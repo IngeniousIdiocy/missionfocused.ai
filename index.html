@@ -66,6 +66,37 @@ body {
   background: rgba(6, 255, 165, 0.2);
   border: 1px solid rgba(6, 255, 165, 0.5);
 }
+#settings-toggle {
+  position: fixed;
+  bottom: 10px;
+  left: calc(50% - 120px);
+  transform: translateX(-50%);
+  background: rgba(84, 198, 255, 0.1);
+  border: 1px solid rgba(84, 198, 255, 0.3);
+  padding: 15px;
+  border-radius: 50%;
+  backdrop-filter: blur(10px);
+  font-size: 18px;
+  text-align: center;
+  z-index: 100;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.3s ease;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#settings-toggle:hover {
+  background: rgba(84, 198, 255, 0.2);
+  border: 1px solid rgba(84, 198, 255, 0.5);
+  transform: translateX(-50%) scale(1.05);
+}
+#settings-toggle.active {
+  background: rgba(255, 91, 195, 0.2);
+  border: 1px solid rgba(255, 91, 195, 0.5);
+}
 #logo {
   position: fixed;
   top: 20px;
@@ -109,6 +140,7 @@ body {
 </head>
 <body>
 <div id="logo">MissionFocused.ai</div>
+<div id="settings-toggle">⚙️</div>
 <div id="instructions">panel</div>
 <div id="camera-toggle">📷</div>
 <div id="controls">
@@ -171,6 +203,14 @@ body {
   <label>Content Panel Text</label>
   <input type="range" id="panelTextOpacity" min="0" max="1" step="0.1" value="0.9">
   <span class="value" id="panelTextOpacityValue">0.9</span>
+  
+  <label>Panel Z-Depth (Landscape)</label>
+  <input type="range" id="panelZDepthLandscape" min="0" max="7" step="0.5" value="6">
+  <span class="value" id="panelZDepthLandscapeValue">6</span>
+  
+  <label>Panel Z-Depth (Portrait)</label>
+  <input type="range" id="panelZDepthPortrait" min="0" max="7" step="0.5" value="5">
+  <span class="value" id="panelZDepthPortraitValue">5</span>
 </div>
 <canvas id="canvas"></canvas>
 
@@ -197,6 +237,9 @@ const keys = {
 };
 let mouseX = 0, mouseY = 0;
 let isPointerLocked = false;
+let isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+let touchStartX = 0;
+let touchStartY = 0;
 let isCameraFree = false;
 
 // Camera boundaries
@@ -220,6 +263,8 @@ let lightsPerLayerValue = 5;
 let spotlightIntensityValue = 5;
 let panelBgOpacityValue = 0;
 let panelTextOpacityValue = 0.9;
+let panelZDepthLandscapeValue = 6;
+let panelZDepthPortraitValue = 5;
 
 // Setup control event listeners
 function setupControls() {
@@ -321,6 +366,19 @@ function setupControls() {
   panelTextOpacity.addEventListener('input', (e) => {
     panelTextOpacityValue = parseFloat(e.target.value);
     document.getElementById('panelTextOpacityValue').textContent = panelTextOpacityValue;
+  });
+  
+  const panelZDepthLandscape = document.getElementById('panelZDepthLandscape');
+  const panelZDepthPortrait = document.getElementById('panelZDepthPortrait');
+  
+  panelZDepthLandscape.addEventListener('input', (e) => {
+    panelZDepthLandscapeValue = parseFloat(e.target.value);
+    document.getElementById('panelZDepthLandscapeValue').textContent = panelZDepthLandscapeValue;
+  });
+  
+  panelZDepthPortrait.addEventListener('input', (e) => {
+    panelZDepthPortraitValue = parseFloat(e.target.value);
+    document.getElementById('panelZDepthPortraitValue').textContent = panelZDepthPortraitValue;
   });
 }
 
@@ -972,7 +1030,19 @@ function animatePanel(group, toFront) {
   const startPos = group.position.clone();
   const startRot = group.rotation.clone();
   const startScale = group.scale.clone();
-  const targetPos = toFront ? group.userData.targetPosition : group.userData.originalPosition;
+  
+  // Dynamic z-depth based on aspect ratio
+  let dynamicTargetPos;
+  if (toFront) {
+    const aspectRatio = window.innerWidth / window.innerHeight;
+    const isLandscape = aspectRatio > 1;
+    const zDepth = isLandscape ? panelZDepthLandscapeValue : panelZDepthPortraitValue;
+    dynamicTargetPos = new THREE.Vector3(ORIGINAL_CAMERA_POSITION.x, 2.5, zDepth);
+  } else {
+    dynamicTargetPos = group.userData.originalPosition;
+  }
+  
+  const targetPos = dynamicTargetPos;
   const targetRot = toFront ? group.userData.targetRotation : group.userData.originalRotation;
   const targetScale = toFront ? group.userData.targetScale : group.userData.originalScale;
   
@@ -1111,7 +1181,7 @@ function updateCameraMovement() {
 
 // Mouse movement for camera look
 function onMouseMove(event) {
-  if (!isPointerLocked || !isCameraFree) return;
+  if (!isPointerLocked || !isCameraFree || isTouchDevice) return;
   
   const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
   const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
@@ -1128,6 +1198,46 @@ function onMouseMove(event) {
   camera.rotation.x = -mouseY;
 }
 
+// Touch event handlers for mobile camera control
+function onTouchStart(event) {
+  if (!isCameraFree || !isTouchDevice) return;
+  event.preventDefault();
+  
+  const touch = event.touches[0];
+  touchStartX = touch.clientX;
+  touchStartY = touch.clientY;
+}
+
+function onTouchMove(event) {
+  if (!isCameraFree || !isTouchDevice) return;
+  event.preventDefault();
+  
+  const touch = event.touches[0];
+  const deltaX = touch.clientX - touchStartX;
+  const deltaY = touch.clientY - touchStartY;
+  
+  // Apply touch sensitivity (similar to mouse)
+  mouseX += deltaX * mouseSensitivityValue * 0.003;
+  mouseY += deltaY * mouseSensitivityValue * 0.003;
+  
+  // Limit vertical rotation
+  mouseY = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, mouseY));
+  
+  // Apply rotation
+  camera.rotation.order = 'YXZ';
+  camera.rotation.y = -mouseX;
+  camera.rotation.x = -mouseY;
+  
+  // Update touch start position for continuous rotation
+  touchStartX = touch.clientX;
+  touchStartY = touch.clientY;
+}
+
+function onTouchEnd(event) {
+  if (!isCameraFree || !isTouchDevice) return;
+  event.preventDefault();
+}
+
 // Pointer lock handlers
 function onPointerLockChange() {
   isPointerLocked = document.pointerLockElement === renderer.domElement;
@@ -1142,6 +1252,11 @@ function initPointerLock() {
   document.addEventListener('pointerlockchange', onPointerLockChange);
   document.addEventListener('pointerlockerror', onPointerLockError);
   document.addEventListener('mousemove', onMouseMove);
+  
+  // Add touch event listeners for mobile support
+  renderer.domElement.addEventListener('touchstart', onTouchStart, { passive: false });
+  renderer.domElement.addEventListener('touchmove', onTouchMove, { passive: false });
+  renderer.domElement.addEventListener('touchend', onTouchEnd, { passive: false });
 }
 
 // Camera toggle functionality
@@ -1153,8 +1268,8 @@ function toggleCamera() {
     isCameraFree = false;
     cameraButton.classList.remove('active');
     
-    // Exit pointer lock
-    if (document.exitPointerLock) {
+    // Exit pointer lock (desktop only)
+    if (!isTouchDevice && document.exitPointerLock) {
       document.exitPointerLock();
     }
     
@@ -1165,8 +1280,10 @@ function toggleCamera() {
     isCameraFree = true;
     cameraButton.classList.add('active');
     
-    // Request pointer lock
-    renderer.domElement.requestPointerLock();
+    // Request pointer lock (desktop only)
+    if (!isTouchDevice) {
+      renderer.domElement.requestPointerLock();
+    }
   }
 }
 
@@ -1233,6 +1350,20 @@ document.getElementById('instructions').addEventListener('click', () => {
 // Camera toggle button
 document.getElementById('camera-toggle').addEventListener('click', () => {
   toggleCamera();
+});
+
+// Settings toggle button
+document.getElementById('settings-toggle').addEventListener('click', () => {
+  const controls = document.getElementById('controls');
+  const settingsButton = document.getElementById('settings-toggle');
+  
+  if (controls.style.display === 'none' || controls.style.display === '') {
+    controls.style.display = 'block';
+    settingsButton.classList.add('active');
+  } else {
+    controls.style.display = 'none';
+    settingsButton.classList.remove('active');
+  }
 });
 
 // WASD movement controls
