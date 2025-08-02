@@ -3,231 +3,1073 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MissionFocused.ai</title>
-
-<!-- 2025‑08‑01 build v5: trust section re‑aligned with text‑first layout + mission‑aligned WebGL icons -->
-<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<title>MissionFocused.ai - Mission Control</title>
 <style>
-/* ──────────────────────────────────────────────────────────────
-   GLOBAL STYLES  (unchanged)
-────────────────────────────────────────────────────────────── */
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg-primary:#0d1018;
-  --glass-bg:rgba(255,255,255,.05);
-  --glass-border:rgba(255,255,255,.12);
-  --glass-shadow:0 8px 32px rgba(0,0,0,.4);
-  --text-primary:rgba(255,255,255,.96);
-  --text-secondary:rgba(255,255,255,.75);
-  --accent:#54c6ff;--accent-secondary:#ff5bc3;--accent-tertiary:#8c62ff;--accent-green:#06ffa5;
-  --blur-amount:20px;
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { 
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
 }
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.6;overflow-x:hidden;padding-top:80px;min-height:100vh}
-body::before{content:'';position:fixed;inset:0;background:
-    radial-gradient(circle at 20% 80%,var(--accent) 0%,transparent 50%),
-    radial-gradient(circle at 80% 20%,var(--accent-secondary) 0%,transparent 50%),
-    radial-gradient(circle at 40% 40%,var(--accent-tertiary) 0%,transparent 50%),
-    radial-gradient(circle at 90% 90%,var(--accent-green) 0%,transparent 50%);
-  filter:blur(100px);opacity:.45;animation:floatLights 28s ease-in-out infinite;z-index:-1}
-@keyframes floatLights{0%,100%{transform:translate(0,0) scale(1) rotate(0deg)}
-  33%{transform:translate(-30px,-40px) scale(1.1) rotate(120deg)}
-  66%{transform:translate(25px,-15px) scale(.9) rotate(240deg)}}
-.top-nav{position:fixed;top:0;left:0;right:0;padding:20px 40px;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.03);backdrop-filter:blur(30px);border-bottom:1px solid rgba(255,255,255,.1);z-index:10}
-.logo{font-size:1.3rem;font-weight:600}
-.cta-button{padding:14px 30px;border:none;border-radius:12px;cursor:pointer;color:var(--text-primary);background:rgba(255,255,255,.1);backdrop-filter:blur(12px);transition:.3s}
-.cta-button:hover{background:rgba(255,255,255,.18);transform:translateY(-2px)}
-h1,h2,h3{letter-spacing:-.4px;line-height:1.25}
-h1{font-size:3rem;background:linear-gradient(135deg,var(--text-primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-h2{font-size:1.9rem;margin-bottom:.45em}
-h3{font-size:1.35rem;margin-bottom:.3em;color:var(--accent)}
-section{padding:80px 20px;max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
-.glass{background:var(--glass-bg);border:1px solid var(--glass-border);backdrop-filter:blur(var(--blur-amount));box-shadow:var(--glass-shadow);border-radius:16px;padding:40px;margin-bottom:10px}
-.hero{text-align:center;padding:140px 20px 120px}
-.feature-list{display:flex;flex-wrap:wrap;gap:20px}
-.feature{flex:1 1 260px;min-height:180px;padding:24px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(10px);box-shadow:0 4px 15px rgba(0,0,0,.12),inset 0 1px 1px rgba(255,255,255,.07)}
-.service-list,.faq-list{margin-left:22px}
-.service-list li,.faq-list li{margin-bottom:.6em}
-.contact-container{display:flex;flex-direction:column;align-items:center;gap:24px}
-.contact-container form{display:flex;flex-direction:column;gap:16px;width:100%;max-width:480px}
-input,textarea{width:100%;padding:12px 16px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.02);color:var(--text-primary)}
-textarea{min-height:140px;resize:vertical}
-footer{margin-top:80px;text-align:center;padding:40px 0;color:var(--text-secondary)}
-
-/* ──────────────────────────────────────────────────────────────
-   TRUST BLOCK – revised
-────────────────────────────────────────────────────────────── */
-.trust-section{display:flex;flex-wrap:wrap;justify-content:center;gap:60px;margin-top:40px}
-.trust-item{text-align:center;max-width:340px;display:flex;flex-direction:column;align-items:center;gap:18px}
-.trust-icon{position:relative;width:180px;height:180px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-.trust-icon canvas{position:absolute;inset:0;width:100%;height:100%}
-.trust-icon .glow{content:"";position:absolute;inset:0;border-radius:50%;
-  background:radial-gradient(circle,var(--accent) 0%,rgba(84,198,255,.15) 45%,transparent 70%);
-  filter:blur(12px);z-index:0}
+#canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
+#instructions {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(84, 198, 255, 0.1);
+  border: 1px solid rgba(84, 198, 255, 0.3);
+  padding: 15px 30px;
+  border-radius: 30px;
+  backdrop-filter: blur(10px);
+  font-size: 14px;
+  text-align: center;
+  z-index: 100;
+}
+#logo {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  font-size: 24px;
+  font-weight: 600;
+  color: #54c6ff;
+  text-shadow: 0 0 20px rgba(84, 198, 255, 0.5);
+  z-index: 100;
+}
+#lighting-controls {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(84, 198, 255, 0.3);
+  padding: 20px;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  z-index: 100;
+  color: #fff;
+  font-family: monospace;
+  font-size: 12px;
+  display: none;
+  transition: opacity 0.3s ease;
+}
+#lighting-controls label {
+  display: block;
+  margin-bottom: 5px;
+  color: #54c6ff;
+}
+#lighting-controls input[type="range"] {
+  width: 150px;
+  margin-bottom: 15px;
+}
+#lighting-controls .value {
+  color: #06ffa5;
+  font-weight: bold;
+}
 </style>
 </head>
-
 <body>
-<nav class="top-nav"><div class="logo">MissionFocused.ai</div><button class="cta-button" id="login-btn">Login</button></nav>
+<div id="logo">MissionFocused.ai</div>
+<div id="instructions">Press 1-7 to summon screens • Press 0 or same number to return • Press C for lighting controls</div>
+<div id="lighting-controls">
+  <label>Background Sphere Opacity</label>
+  <input type="range" id="sphereOpacity" min="0" max="1" step="0.1" value="0.2">
+  <span class="value" id="sphereOpacityValue">0.2</span>
+  
+  <label>Background Sphere Intensity</label>
+  <input type="range" id="sphereIntensity" min="0" max="1" step="0.1" value="1">
+  <span class="value" id="sphereIntensityValue">1</span>
+  
+  <label>Fog Opacity</label>
+  <input type="range" id="fogOpacity" min="0" max="0.2" step="0.01" value="0.2">
+  <span class="value" id="fogOpacityValue">0.2</span>
+  
+  <label>Fog Saturation</label>
+  <input type="range" id="fogSaturation" min="0" max="1" step="0.1" value="1">
+  <span class="value" id="fogSaturationValue">1</span>
+  
+  <label>Radar Plane Opacity</label>
+  <input type="range" id="radarOpacity" min="0" max="1" step="0.1" value="1">
+  <span class="value" id="radarOpacityValue">1</span>
+  
+  <label>Radar Background Alpha</label>
+  <input type="range" id="radarBgAlpha" min="0" max="0.2" step="0.01" value="0.2">
+  <span class="value" id="radarBgAlphaValue">0.2</span>
+  
+  <label>Radar Line Alpha</label>
+  <input type="range" id="radarLineAlpha" min="0" max="1" step="0.1" value="1">
+  <span class="value" id="radarLineAlphaValue">1</span>
+  
+  <label>Panel Matrix Opacity</label>
+  <input type="range" id="panelMatrixOpacity" min="0" max="2" step="0.1" value="2">
+  <span class="value" id="panelMatrixOpacityValue">2</span>
+  
+  <label>Panel Matrix Intensity</label>
+  <input type="range" id="panelMatrixIntensity" min="0" max="2" step="0.1" value="2">
+  <span class="value" id="panelMatrixIntensityValue">2</span>
+</div>
+<canvas id="canvas"></canvas>
 
-<header class="hero glass">
-  <h1>Automate to Amplify Your Mission</h1>
-  <p>MissionFocused.ai streamlines your nonprofit's back office so you can focus on impact.</p>
-  <button class="cta-button" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Get in Touch</button>
-</header>
-
-<!-- ABOUT -->
-<section id="about" class="about glass">
-  <h2>About Us</h2>
-  <p>Born from a passion for nonprofit efficiency, MissionFocused.ai helps organizations slash overhead and channel more resources directly to mission.</p>
-  <p>Our founders are veterans of the charity world who know the constraints of limited staff, outdated software, and rigid compliance. We package best‑in‑class automation into an affordable SaaS platform so nonprofits of any size can modernize without hiring an army of developers.</p>
-</section>
-
-<!-- FEATURES -->
-<section id="features" class="features glass">
-  <h2>Platform Highlights</h2>
-  <div class="feature-list">
-    <div class="feature"><h3>No‑Code Workflows</h3><p>Drag‑and‑drop builders let program managers automate grants, reimbursements, and donor receipts without engineering tickets.</p></div>
-    <div class="feature"><h3>Composable Data Hub</h3><p>Unified API stitches together QuickBooks, Salesforce NPSP, and Google Workspace so data lives in one real‑time graph.</p></div>
-    <div class="feature"><h3>AI Document Copilot</h3><p>OCR + LLMs classify invoices, pull GL codes, and draft acknowledgment letters in minutes—not days.</p></div>
-    <div class="feature"><h3>Audit‑Ready Ledger</h3><p>Every transaction is immutably hashed and time‑stamped, giving auditors one‑click access to evidence.</p></div>
-  </div>
-</section>
-
-<!-- SERVICES -->
-<section id="services" class="services glass">
-  <h2>Professional Services</h2>
-  <ul class="service-list">
-    <li>Configure and build your own Finance AI Agent to automate finance functions</li>
-    <li>CRM migrations &amp; donor segmentation</li>
-    <li>Custom AI assistants for case management</li>
-    <li>Grant compliance &amp; reporting automation</li>
-  </ul>
-</section>
-
-<!-- TRUST – new animations, original text structure -->
-<section id="trust" class="trust glass">
-  <h2>Why Organizations Trust Us</h2>
-
-  <div class="trust-section">
-    <!-- Never Lose Information -->
-    <div class="trust-item">
-      <div id="orbitIcon" class="trust-icon"><span class="glow"></span></div>
-      <h3>Never Lose Information</h3>
-      <p>Collect web snippets, docs, and emails from mobile, desktop, online or offline. Instant, secure sync.</p>
-    </div>
-
-    <!-- Hardened Security -->
-    <div class="trust-item">
-      <div id="shieldIcon" class="trust-icon"><span class="glow"></span></div>
-      <h3>Hardened Security</h3>
-      <p>End‑to‑end encryption means only you can read your data — <em>not even us</em>.</p>
-      <p><em>Secure yet open</em> — export anytime, integrate with Zapier, and self‑host on request.</p>
-    </div>
-  </div>
-</section>
-
-<!-- FAQ -->
-<section id="faq" class="faq glass">
-  <h2>FAQ</h2>
-  <ul class="faq-list">
-    <li><strong>Is MissionFocused.ai just for US nonprofits?</strong> No — our platform supports multi‑currency and GDPR compliance.</li>
-    <li><strong>Can we deploy on‑prem?</strong> Yes, via our Kubernetes operator.</li>
-    <li><strong>Do you offer discounts?</strong> Early adopters receive a lifetime 30 % subscription discount.</li>
-  </ul>
-</section>
-
-<!-- CONTACT -->
-<section id="contact" class="contact glass">
-  <div class="contact-container">
-    <h2>Contact</h2>
-    <p>We'd love to learn about your mission. Email <a href="mailto:hello@missionfocused.ai">hello@missionfocused.ai</a> or send us a note:</p>
-    <form>
-      <input placeholder="Name" required>
-      <input placeholder="Email" type="email" required>
-      <textarea placeholder="Tell us about your challenges…"></textarea>
-      <button class="cta-button" type="submit">Send</button>
-    </form>
-  </div>
-</section>
-
-<footer>© 2025 MissionFocused.ai</footer>
-
-<!-- ──────────────────────────────────────────────────────────────
-     SCRIPTS
-────────────────────────────────────────────────────────────── -->
-<script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-/* ══════════════════════════════════════════════════════════════
-   ORBIT SKETCH  – “Never Lose Information”
-══════════════════════════════════════════════════════════════ */
-const orbitSketch = (p)=>{
-  const ORBITS = 60;
-  let container,cw,ch;
-  let dots=[];
-  p.setup=()=>{
-    container=document.getElementById('orbitIcon');
-    cw=container.clientWidth;ch=container.clientHeight;
-    p.createCanvas(cw,ch,p.WEBGL).parent(container);
-    p.angleMode(p.RADIANS);
-    p.strokeWeight(3);p.noFill();
-    for(let i=0;i<ORBITS;i++){
-      dots.push({
-        r:p.random(28,75),
-        ang:p.random(p.TWO_PI),
-        spd:p.random(.006,.02)*(p.random()<.5?1:-1)
+// Scene setup
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x000000, 5, 50);
+
+// Lighting control variables
+let sphereOpacityValue = 0.2;
+let sphereIntensityValue = 1;
+let fogOpacityValue = 0.2;
+let fogSaturationValue = 1;
+let radarOpacityValue = 1;
+let radarBgAlphaValue = 0.2;
+let radarLineAlphaValue = 1;
+let panelMatrixOpacityValue = 2;
+let panelMatrixIntensityValue = 2;
+
+// Setup lighting control event listeners
+function setupLightingControls() {
+  const sphereOpacity = document.getElementById('sphereOpacity');
+  const sphereIntensity = document.getElementById('sphereIntensity');
+  const fogOpacity = document.getElementById('fogOpacity');
+  const fogSaturation = document.getElementById('fogSaturation');
+  
+  sphereOpacity.addEventListener('input', (e) => {
+    sphereOpacityValue = parseFloat(e.target.value);
+    document.getElementById('sphereOpacityValue').textContent = sphereOpacityValue;
+  });
+  
+  sphereIntensity.addEventListener('input', (e) => {
+    sphereIntensityValue = parseFloat(e.target.value);
+    document.getElementById('sphereIntensityValue').textContent = sphereIntensityValue;
+  });
+  
+  fogOpacity.addEventListener('input', (e) => {
+    fogOpacityValue = parseFloat(e.target.value);
+    document.getElementById('fogOpacityValue').textContent = fogOpacityValue;
+  });
+  
+  fogSaturation.addEventListener('input', (e) => {
+    fogSaturationValue = parseFloat(e.target.value);
+    document.getElementById('fogSaturationValue').textContent = fogSaturationValue;
+  });
+  
+  const radarOpacity = document.getElementById('radarOpacity');
+  const radarBgAlpha = document.getElementById('radarBgAlpha');
+  const radarLineAlpha = document.getElementById('radarLineAlpha');
+  
+  radarOpacity.addEventListener('input', (e) => {
+    radarOpacityValue = parseFloat(e.target.value);
+    document.getElementById('radarOpacityValue').textContent = radarOpacityValue;
+  });
+  
+  radarBgAlpha.addEventListener('input', (e) => {
+    radarBgAlphaValue = parseFloat(e.target.value);
+    document.getElementById('radarBgAlphaValue').textContent = radarBgAlphaValue;
+  });
+  
+  radarLineAlpha.addEventListener('input', (e) => {
+    radarLineAlphaValue = parseFloat(e.target.value);
+    document.getElementById('radarLineAlphaValue').textContent = radarLineAlphaValue;
+  });
+  
+  const panelMatrixOpacity = document.getElementById('panelMatrixOpacity');
+  const panelMatrixIntensity = document.getElementById('panelMatrixIntensity');
+  
+  panelMatrixOpacity.addEventListener('input', (e) => {
+    panelMatrixOpacityValue = parseFloat(e.target.value);
+    document.getElementById('panelMatrixOpacityValue').textContent = panelMatrixOpacityValue;
+  });
+  
+  panelMatrixIntensity.addEventListener('input', (e) => {
+    panelMatrixIntensityValue = parseFloat(e.target.value);
+    document.getElementById('panelMatrixIntensityValue').textContent = panelMatrixIntensityValue;
+  });
+}
+
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas'), antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+// Fixed camera position
+camera.position.set(0, 3, 10);
+camera.lookAt(0, 2, 0);
+
+// Content for screens
+const screenContent = [
+  {
+    title: "MISSION COMMAND",
+    content: "Automate to Amplify Your Mission\n\nMissionFocused.ai streamlines your nonprofit's back office so you can focus on impact.",
+    color: 0x54c6ff
+  },
+  {
+    title: "ABOUT SECTOR",
+    content: "Born from a passion for nonprofit efficiency, MissionFocused.ai helps organizations slash overhead and channel more resources directly to mission.\n\nOur founders are veterans of the charity world who know the constraints of limited staff, outdated software, and rigid compliance.",
+    color: 0xff5bc3
+  },
+  {
+    title: "PLATFORM SYSTEMS",
+    content: "• No-Code Workflows\n• Composable Data Hub\n• AI Document Copilot\n• Audit-Ready Ledger\n\nDrag-and-drop builders, unified APIs, OCR + LLMs, and immutable transaction logging.",
+    color: 0x8c62ff
+  },
+  {
+    title: "SERVICES DIVISION",
+    content: "• Configure Finance AI Agents\n• CRM migrations & donor segmentation\n• Custom AI assistants for case management\n• Grant compliance & reporting automation",
+    color: 0x06ffa5
+  },
+  {
+    title: "SECURITY PROTOCOLS",
+    content: "NEVER LOSE INFORMATION\nCollect web snippets, docs, and emails from any device. Instant, secure sync.\n\nHARDENED SECURITY\nEnd-to-end encryption. Export anytime, integrate with Zapier, self-host on request.",
+    color: 0x54c6ff
+  },
+  {
+    title: "INTEL BRIEFING",
+    content: "Q: Is MissionFocused.ai just for US nonprofits?\nA: No — multi-currency and GDPR compliant.\n\nQ: Can we deploy on-prem?\nA: Yes, via Kubernetes operator.\n\nQ: Discounts?\nA: Early adopters receive lifetime 30% off.",
+    color: 0xff5bc3
+  },
+  {
+    title: "COMMUNICATIONS",
+    content: "CONTACT MISSION CONTROL\n\nhello@missionfocused.ai\n\nWe'd love to learn about your mission and help you achieve maximum impact with minimal overhead.",
+    color: 0x8c62ff
+  }
+];
+
+// Enhanced ambient lighting for better purple/blue visibility
+const ambientLight = new THREE.AmbientLight(0x1a0a2e, 0.3);
+scene.add(ambientLight);
+
+// Moving lights for dynamic effect - enhanced for glassmorphic look
+const lights = [];
+const lightColors = [0x54c6ff, 0xff5bc3, 0x06ffa5, 0x8c62ff];
+for (let i = 0; i < 4; i++) {
+  const light = new THREE.PointLight(
+    lightColors[i], 
+    3, 
+    40
+  );
+  light.position.set(
+    Math.random() * 30 - 15,
+    Math.random() * 10 - 2,
+    Math.random() * 30 - 15
+  );
+  scene.add(light);
+  lights.push(light);
+}
+
+// Radar system
+const radarCanvas = document.createElement('canvas');
+radarCanvas.width = 512;
+radarCanvas.height = 512;
+const radarCtx = radarCanvas.getContext('2d');
+
+const radarGeometry = new THREE.PlaneGeometry(50, 25); // Full grid width, half height
+const radarTexture = new THREE.CanvasTexture(radarCanvas);
+const radarMaterial = new THREE.MeshBasicMaterial({
+  map: radarTexture,
+  transparent: true,
+  opacity: 0.7,
+  side: THREE.DoubleSide
+});
+
+const radarMesh = new THREE.Mesh(radarGeometry, radarMaterial);
+radarMesh.position.set(0, -2, -25); // Animation center at floor level
+radarMesh.rotation.x = 0; // Vertical on wall
+scene.add(radarMesh);
+
+// Bogey tracking data
+const bogeys = [
+  { x: 0.3, y: 0.2, speed: 0.02, direction: Math.PI / 4, lastPing: 0, lastDirectionChange: 0, baseSpeed: 0.02 },
+  { x: -0.4, y: 0.1, speed: 0.015, direction: -Math.PI / 3, lastPing: 0, lastDirectionChange: 0, baseSpeed: 0.015 },
+  { x: 0.1, y: -0.35, speed: 0.025, direction: Math.PI * 0.8, lastPing: 0, lastDirectionChange: 0, baseSpeed: 0.025 },
+  { x: -0.2, y: -0.3, speed: 0.018, direction: Math.PI * 1.2, lastPing: 0, lastDirectionChange: 0, baseSpeed: 0.018 }
+];
+
+let radarRotation = 0;
+
+// Shared panel matrix system
+const panelMatrixCanvas = document.createElement('canvas');
+panelMatrixCanvas.width = 1024;
+panelMatrixCanvas.height = 1024;
+const panelMatrixCtx = panelMatrixCanvas.getContext('2d');
+
+// Panel matrix columns
+const panelMatrixColumns = [];
+const columnCount = 80; // More columns for larger canvas
+
+// Initialize panel matrix
+function initializePanelMatrix() {
+  for (let i = 0; i < columnCount; i++) {
+    panelMatrixColumns.push({
+      x: (i * 12) + Math.random() * 4,
+      y: Math.random() * -1000,
+      speed: 0.5 + Math.random() * 1,
+      chars: [],
+      lastChar: 0
+    });
+  }
+}
+
+// Update shared panel matrix
+function updatePanelMatrix() {
+  // Clear canvas
+  panelMatrixCtx.clearRect(0, 0, panelMatrixCanvas.width, panelMatrixCanvas.height);
+  
+  panelMatrixColumns.forEach(column => {
+    // Move column down
+    column.y += column.speed;
+    
+    // Add new character occasionally
+    column.lastChar += 1;
+    if (column.lastChar > 15 + Math.random() * 30) {
+      column.chars.push({
+        char: matrixChars[Math.floor(Math.random() * matrixChars.length)],
+        y: column.y,
+        alpha: 1
+      });
+      column.lastChar = 0;
+    }
+    
+    // Update and draw characters
+    for (let j = column.chars.length - 1; j >= 0; j--) {
+      const char = column.chars[j];
+      
+      // Character fades as it gets older
+      const distanceFromHead = column.y - char.y;
+      char.alpha = Math.max(0, 1 - (distanceFromHead / 120));
+      
+      if (char.alpha > 0) {
+        // Calculate alpha with intensity control
+        const finalAlpha = char.alpha * panelMatrixIntensityValue;
+        
+        if (j === column.chars.length - 1) {
+          // Head character - brighter
+          panelMatrixCtx.fillStyle = `rgba(150, 255, 150, ${finalAlpha})`;
+          panelMatrixCtx.font = 'bold 14px monospace';
+        } else {
+          // Trail characters
+          panelMatrixCtx.fillStyle = `rgba(100, 200, 100, ${finalAlpha * 0.7})`;
+          panelMatrixCtx.font = '12px monospace';
+        }
+        
+        panelMatrixCtx.fillText(char.char, column.x, char.y);
+      } else {
+        // Remove faded characters
+        column.chars.splice(j, 1);
+      }
+    }
+    
+    // Reset column when it goes off screen
+    if (column.y > panelMatrixCanvas.height + 100) {
+      column.y = Math.random() * -300;
+      column.chars = [];
+    }
+  });
+}
+
+// Radar drawing function
+function updateRadar() {
+  const centerX = radarCanvas.width / 2;
+  const centerY = radarCanvas.height / 2;
+  const radius = centerX - 20;
+  
+  // Clear canvas (transparent background)
+  radarCtx.clearRect(0, 0, radarCanvas.width, radarCanvas.height);
+  
+  // Set up clipping to show only top half
+  radarCtx.save();
+  radarCtx.beginPath();
+  radarCtx.rect(0, 0, radarCanvas.width, radarCanvas.height / 2);
+  radarCtx.clip();
+  
+  // Draw radar circles (glassmorphic) with controllable alpha
+  radarCtx.strokeStyle = `rgba(84, 198, 255, ${radarLineAlphaValue})`;
+  radarCtx.lineWidth = 1;
+  for (let i = 1; i <= 4; i++) {
+    radarCtx.beginPath();
+    radarCtx.arc(centerX, centerY, (radius / 4) * i, 0, Math.PI * 2);
+    radarCtx.stroke();
+  }
+  
+  // Draw crosshairs
+  radarCtx.beginPath();
+  radarCtx.moveTo(centerX - radius, centerY);
+  radarCtx.lineTo(centerX + radius, centerY);
+  radarCtx.moveTo(centerX, centerY - radius);
+  radarCtx.lineTo(centerX, centerY + radius);
+  radarCtx.stroke();
+  
+  // Update bogey positions with random movement
+  bogeys.forEach(bogey => {
+    // Random direction changes
+    bogey.lastDirectionChange += 1;
+    if (bogey.lastDirectionChange > 30 + Math.random() * 120) { // Change direction every 30-150 frames
+      bogey.direction += (Math.random() - 0.5) * Math.PI * 0.8; // Random turn up to ±72 degrees
+      bogey.lastDirectionChange = 0;
+    }
+    
+    // Random speed variations
+    bogey.speed = bogey.baseSpeed * (0.5 + Math.random() * 1.5); // 50% to 200% of base speed
+    
+    // Add small random jitter to movement
+    const jitterX = (Math.random() - 0.5) * 0.005;
+    const jitterY = (Math.random() - 0.5) * 0.005;
+    
+    // Move bogey
+    bogey.x += Math.cos(bogey.direction) * bogey.speed + jitterX;
+    bogey.y += Math.sin(bogey.direction) * bogey.speed + jitterY;
+    
+    // Keep bogeys in bounds with more random bouncing
+    const distance = Math.sqrt(bogey.x * bogey.x + bogey.y * bogey.y);
+    if (distance > 0.9) {
+      // Random bounce angle instead of simple reverse
+      const bounceAngle = Math.atan2(bogey.y, bogey.x) + Math.PI + (Math.random() - 0.5) * Math.PI * 0.5;
+      bogey.direction = bounceAngle;
+      bogey.lastDirectionChange = 0; // Reset direction change timer
+    }
+    
+    // Limit to radar range
+    if (distance > 0.95) {
+      bogey.x *= 0.9;
+      bogey.y *= 0.9;
+    }
+  });
+  
+  // Draw sweep line (rotating)
+  radarRotation += 0.03;
+  const sweepX = centerX + Math.cos(radarRotation) * radius;
+  const sweepY = centerY + Math.sin(radarRotation) * radius;
+  
+  // Sweep trail effect
+  const gradient = radarCtx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+  gradient.addColorStop(0, 'rgba(0, 255, 100, 0.8)');
+  gradient.addColorStop(0.3, 'rgba(0, 255, 100, 0.4)');
+  gradient.addColorStop(1, 'rgba(0, 255, 100, 0)');
+  
+  radarCtx.save();
+  radarCtx.translate(centerX, centerY);
+  radarCtx.rotate(radarRotation);
+  radarCtx.beginPath();
+  radarCtx.moveTo(0, 0);
+  radarCtx.arc(0, 0, radius, -Math.PI / 6, Math.PI / 6);
+  radarCtx.closePath();
+  radarCtx.fillStyle = gradient;
+  radarCtx.fill();
+  radarCtx.restore();
+  
+  // Draw sweep line
+  radarCtx.strokeStyle = 'rgba(0, 255, 100, 1)';
+  radarCtx.lineWidth = 2;
+  radarCtx.beginPath();
+  radarCtx.moveTo(centerX, centerY);
+  radarCtx.lineTo(sweepX, sweepY);
+  radarCtx.stroke();
+  
+  // Draw bogeys
+  bogeys.forEach(bogey => {
+    const bogeyX = centerX + bogey.x * radius;
+    const bogeyY = centerY + bogey.y * radius;
+    
+    // Calculate if bogey should be highlighted (recently swept)
+    const bogeyAngle = Math.atan2(bogey.y, bogey.x);
+    let angleDiff = Math.abs(radarRotation - bogeyAngle);
+    if (angleDiff > Math.PI) angleDiff = Math.PI * 2 - angleDiff;
+    
+    if (angleDiff < 0.2) {
+      bogey.lastPing = time;
+    }
+    
+    // Draw bogey with fade effect
+    const timeSincePing = time - bogey.lastPing;
+    const alpha = Math.max(0, 1 - timeSincePing * 0.3);
+    
+    if (alpha > 0) {
+      radarCtx.fillStyle = `rgba(255, 100, 100, ${alpha})`;
+      radarCtx.beginPath();
+      radarCtx.arc(bogeyX, bogeyY, 4, 0, Math.PI * 2);
+      radarCtx.fill();
+      
+      // Draw target rings
+      radarCtx.strokeStyle = `rgba(255, 100, 100, ${alpha * 0.5})`;
+      radarCtx.lineWidth = 1;
+      radarCtx.beginPath();
+      radarCtx.arc(bogeyX, bogeyY, 8, 0, Math.PI * 2);
+      radarCtx.stroke();
+    }
+  });
+  
+  // Restore canvas context (remove clipping)
+  radarCtx.restore();
+  
+  radarTexture.needsUpdate = true;
+}
+
+// Floor grid
+const gridHelper = new THREE.GridHelper(50, 50, 0x1a1a2e, 0x1a1a2e);
+gridHelper.position.y = -2;
+scene.add(gridHelper);
+
+// Glass wall behind panels - enhanced for better light interaction
+const wallGeometry = new THREE.PlaneGeometry(40, 12);
+const wallMaterial = new THREE.MeshPhysicalMaterial({
+  color: 0x1a0a2e,
+  metalness: 0.1,
+  roughness: 0.1,
+  transparent: true,
+  opacity: 0.25,
+  side: THREE.DoubleSide,
+  transmission: 0.7,
+  ior: 1.4
+});
+const wall = new THREE.Mesh(wallGeometry, wallMaterial);
+wall.position.z = -12;
+wall.position.y = 3;
+scene.add(wall);
+
+// Add additional glass panels for depth with glassmorphic effect
+const glassPanels = [];
+for (let i = 0; i < 3; i++) {
+  const glassPanel = new THREE.Mesh(
+    new THREE.PlaneGeometry(15, 8),
+    new THREE.MeshPhysicalMaterial({
+      color: [0x2a0a3e, 0x1a0a2e, 0x0a1a2e][i],
+      metalness: 0.2,
+      roughness: 0.1,
+      transparent: true,
+      opacity: 0.15,
+      transmission: 0.8,
+      ior: 1.5
+    })
+  );
+  glassPanel.position.set(
+    (i - 1) * 15,
+    3,
+    -18 - i * 3
+  );
+  glassPanel.rotation.y = (i - 1) * 0.2;
+  scene.add(glassPanel);
+  glassPanels.push(glassPanel);
+}
+
+// Background glow sphere
+const backgroundSphere = new THREE.Mesh(
+  new THREE.SphereGeometry(100, 32, 32),
+  new THREE.MeshBasicMaterial({
+    color: 0x4b0082,
+    transparent: true,
+    opacity: sphereOpacityValue,
+    side: THREE.BackSide
+  })
+);
+backgroundSphere.position.set(0, 0, -50);
+scene.add(backgroundSphere);
+
+// Create screens
+const screens = [];
+const screenGroups = [];
+const panelCanvases = []; // Store panel canvases for animation updates
+
+function createScreen(content, index) {
+  const group = new THREE.Group();
+  
+  const geometry = new THREE.PlaneGeometry(4, 3);
+  const material = new THREE.MeshPhongMaterial({
+    color: content.color,
+    emissive: content.color,
+    emissiveIntensity: 0.2,
+    transparent: true,
+    opacity: 0.9,
+    side: THREE.DoubleSide
+  });
+  
+  const screen = new THREE.Mesh(geometry, material);
+  
+  // Create text texture
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 384;
+  const ctx = canvas.getContext('2d');
+  
+  // Store canvas info for animation updates
+  const panelInfo = {
+    canvas: canvas,
+    ctx: ctx,
+    texture: null,
+    content: content,
+    index: index
+  };
+  
+  // Initial draw - will be updated in animation loop
+  // Draw background
+  ctx.fillStyle = 'rgba(0,0,0,0.8)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  const texture = new THREE.CanvasTexture(canvas);
+  panelInfo.texture = texture;
+  
+  const textMaterial = new THREE.MeshBasicMaterial({ 
+    map: texture, 
+    transparent: true,
+    opacity: 0.95
+  });
+  const textMesh = new THREE.Mesh(geometry, textMaterial);
+  textMesh.position.z = 0.01;
+  
+  // Store panel info for updates
+  panelCanvases.push(panelInfo);
+  
+  group.add(screen);
+  group.add(textMesh);
+  
+  // Position screens in two rows
+  const row = index < 4 ? 0 : 1;
+  const col = index < 4 ? index : index - 4;
+  const colsInRow = index < 4 ? 4 : 3;
+  
+  const xSpacing = 9;
+  const ySpacing = 4;
+  const xOffset = -(colsInRow - 1) * xSpacing / 2;
+  
+  group.position.x = xOffset + col * xSpacing;
+  group.position.y = row === 0 ? 5 : 1;
+  group.position.z = -5;
+  
+  // Angle panels slightly toward viewer
+  group.rotation.y = -group.position.x * 0.03;
+  
+  // Store original transform
+  group.userData = {
+    originalPosition: group.position.clone(),
+    originalRotation: group.rotation.clone(),
+    originalScale: group.scale.clone(),
+    targetPosition: new THREE.Vector3(0, 2.5, 6), // Closer to dominate screen
+    targetRotation: new THREE.Euler(0, 0, 0),
+    targetScale: new THREE.Vector3(1.2, 1.2, 1.2),
+    screen: screen,
+    index: index,
+    animating: false,
+    focused: false
+  };
+  
+  scene.add(group);
+  screens.push(screen);
+  screenGroups.push(group);
+  
+  return group;
+}
+
+// Create all screens
+screenContent.forEach((content, i) => createScreen(content, i));
+
+// Function to update all panel backgrounds
+function updatePanelBackgrounds() {
+  panelCanvases.forEach(panelInfo => {
+    const { canvas, ctx, content, index } = panelInfo;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw matrix background (sample from shared canvas)
+    if (panelMatrixOpacityValue > 0) {
+      const sampleX = (index * 120) % (panelMatrixCanvas.width - canvas.width);
+      const sampleY = Math.floor(index / 4) * 250 % (panelMatrixCanvas.height - canvas.height);
+      
+      ctx.globalAlpha = panelMatrixOpacityValue;
+      ctx.drawImage(panelMatrixCanvas, sampleX, sampleY, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+      ctx.globalAlpha = 1;
+    }
+    
+    // Draw background
+    ctx.fillStyle = 'rgba(0,0,0,0.8)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw border
+    ctx.strokeStyle = `rgba(${content.color >> 16 & 255}, ${content.color >> 8 & 255}, ${content.color & 255}, 0.8)`;
+    ctx.lineWidth = 3;
+    ctx.strokeRect(5, 5, canvas.width - 10, canvas.height - 10);
+    
+    // Draw title
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 24px monospace';
+    ctx.fillText(content.title, 20, 40);
+    
+    // Draw content with word wrap
+    ctx.font = '16px monospace';
+    const lines = content.content.split('\n');
+    const maxWidth = canvas.width - 40;
+    let currentY = 80;
+    
+    lines.forEach((line) => {
+      if (line.trim() === '') {
+        currentY += 25;
+        return;
+      }
+      
+      const words = line.split(' ');
+      let currentLine = '';
+      
+      for (let n = 0; n < words.length; n++) {
+        const testLine = currentLine + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        const testWidth = metrics.width;
+        
+        if (testWidth > maxWidth && n > 0) {
+          ctx.fillText(currentLine, 20, currentY);
+          currentLine = words[n] + ' ';
+          currentY += 25;
+        } else {
+          currentLine = testLine;
+        }
+      }
+      ctx.fillText(currentLine, 20, currentY);
+      currentY += 25;
+    });
+    
+    panelInfo.texture.needsUpdate = true;
+  });
+}
+
+// Control stations
+const controlStations = [];
+
+function createControlStation(x, z) {
+  const group = new THREE.Group();
+  
+  // Base
+  const baseGeometry = new THREE.BoxGeometry(2, 0.5, 1);
+  const baseMaterial = new THREE.MeshPhongMaterial({ 
+    color: 0x1a1a2e,
+    emissive: 0x54c6ff,
+    emissiveIntensity: 0.1
+  });
+  const base = new THREE.Mesh(baseGeometry, baseMaterial);
+  group.add(base);
+  
+  // Screen
+  const screenGeometry = new THREE.PlaneGeometry(1.8, 0.8);
+  const screenMaterial = new THREE.MeshPhongMaterial({ 
+    color: 0x54c6ff,
+    emissive: 0x54c6ff,
+    emissiveIntensity: 0.5
+  });
+  const screen = new THREE.Mesh(screenGeometry, screenMaterial);
+  screen.position.y = 0.5;
+  screen.rotation.x = -Math.PI / 6;
+  group.add(screen);
+  
+  // Animated display canvas
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  
+  const texture = new THREE.CanvasTexture(canvas);
+  const displayMaterial = new THREE.MeshBasicMaterial({ map: texture });
+  const display = new THREE.Mesh(screenGeometry, displayMaterial);
+  display.position.copy(screen.position);
+  display.position.z += 0.01;
+  display.rotation.copy(screen.rotation);
+  group.add(display);
+  
+  group.position.set(x, 0, z);
+  scene.add(group);
+  
+  controlStations.push({ group, canvas, ctx, texture });
+}
+
+// Create control stations
+createControlStation(-3, 6);
+createControlStation(0, 6);
+createControlStation(3, 6);
+
+// Particles
+const particlesGeometry = new THREE.BufferGeometry();
+const particlesCount = 1000;
+const posArray = new Float32Array(particlesCount * 3);
+
+for (let i = 0; i < particlesCount * 3; i++) {
+  posArray[i] = (Math.random() - 0.5) * 50;
+}
+
+particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+const particlesMaterial = new THREE.PointsMaterial({
+  size: 0.02,
+  color: 0x54c6ff,
+  transparent: true,
+  opacity: 0.6
+});
+const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+scene.add(particlesMesh);
+
+// Panel animation
+let currentFocus = -1;
+
+function animatePanel(group, toFront) {
+  if (group.userData.animating) return;
+  group.userData.animating = true;
+  
+  const startPos = group.position.clone();
+  const startRot = group.rotation.clone();
+  const startScale = group.scale.clone();
+  const targetPos = toFront ? group.userData.targetPosition : group.userData.originalPosition;
+  const targetRot = toFront ? group.userData.targetRotation : group.userData.originalRotation;
+  const targetScale = toFront ? group.userData.targetScale : group.userData.originalScale;
+  
+  let progress = 0;
+  const animate = () => {
+    progress += 0.025;
+    if (progress >= 1) {
+      group.userData.animating = false;
+      group.userData.focused = toFront;
+      return;
+    }
+    
+    const eased = 1 - Math.pow(1 - progress, 3);
+    
+    group.position.lerpVectors(startPos, targetPos, eased);
+    group.scale.lerpVectors(startScale, targetScale, eased);
+    
+    // Slerp rotation for smooth animation
+    group.rotation.x = startRot.x + (targetRot.x - startRot.x) * eased;
+    group.rotation.y = startRot.y + (targetRot.y - startRot.y) * eased;
+    group.rotation.z = startRot.z + (targetRot.z - startRot.z) * eased;
+    
+    // Add floating effect when focused
+    if (toFront) {
+      group.position.y = targetPos.y + Math.sin(progress * Math.PI) * 0.3;
+    }
+    
+    requestAnimationFrame(animate);
+  };
+  animate();
+}
+
+function focusScreen(index) {
+  const group = screenGroups[index];
+  
+  if (currentFocus === index && group.userData.focused) {
+    // Return to original position
+    animatePanel(group, false);
+    currentFocus = -1;
+  } else {
+    // Return previous panel if any
+    if (currentFocus !== -1 && currentFocus !== index) {
+      animatePanel(screenGroups[currentFocus], false);
+    }
+    // Bring new panel forward
+    animatePanel(group, true);
+    currentFocus = index;
+  }
+}
+
+// Keyboard controls
+window.addEventListener('keydown', (e) => {
+  const key = parseInt(e.key);
+  if (key >= 1 && key <= 7) {
+    focusScreen(key - 1);
+  } else if (key === 0) {
+    if (currentFocus !== -1) {
+      animatePanel(screenGroups[currentFocus], false);
+      currentFocus = -1;
+    }
+  } else if (e.key.toLowerCase() === 'c') {
+    // Toggle lighting controls visibility
+    const controls = document.getElementById('lighting-controls');
+    if (controls.style.display === 'none' || controls.style.display === '') {
+      controls.style.display = 'block';
+    } else {
+      controls.style.display = 'none';
+    }
+  }
+});
+
+// Animation loop
+let time = 0;
+
+// Matrix effect data for each station
+const matrixColumns = [];
+const matrixChars = 'アカサタナハマヤラワガザダバパキシチニヒミリギジヂビピクスツヌフムルグズヅブプケセテネヘメレゲゼデベペコソトノホモロゴゾドボポあかさたなはまやらわがざだばぱきしちにひみりぎじぢびぴくすつぬふむるぐずづぶぷけせてねへめれげぜでべぺこそとのほもろごぞどぼぽ中国日本語文字书写汉字한국어글자조선말문자';
+const stationColors = ['#ff0040', '#00ff40', '#0040ff']; // Red, Green, Blue
+
+// Initialize matrix columns for each station
+function initializeMatrix() {
+  for (let stationIndex = 0; stationIndex < 3; stationIndex++) {
+    const columns = [];
+    const columnCount = 20; // Number of falling columns
+    
+    for (let i = 0; i < columnCount; i++) {
+      columns.push({
+        x: (i * 12) + Math.random() * 4, // Column position with slight randomness
+        y: Math.random() * -500, // Start above screen
+        speed: 1 + Math.random() * 1.5, // Fall speed (half of original)
+        chars: [], // Characters in this column
+        lastChar: 0 // Time since last character
       });
     }
-  };
-  p.draw=()=>{
-    p.clear();                     // transparent background
-    p.rotateX(-0.55);              // gentle 3‑D tilt
-    /* central vault */
-    p.push();
-      p.stroke(84,198,255,220);
-      p.sphere(12,8,6);
-    p.pop();
-    /* orbit paths */
-    p.stroke(84,198,255,70);
-    for(let r=35;r<=75;r+=10){p.ellipse(0,0,r*2);}
-    /* dots */
-    p.stroke(84,198,255,200);
-    for(const d of dots){
-      d.ang+=d.spd;
-      const x=d.r*Math.cos(d.ang), y=d.r*Math.sin(d.ang);
-      p.push();p.translate(x,y,0);p.point(0,0);p.pop();
-    }
-  };
-  p.windowResized=()=>{cw=container.clientWidth;ch=container.clientHeight;p.resizeCanvas(cw,ch);}
-};
-new p5(orbitSketch);
+    matrixColumns.push(columns);
+  }
+}
 
-/* ══════════════════════════════════════════════════════════════
-   SHIELD SKETCH – “Hardened Security”
-══════════════════════════════════════════════════════════════ */
-const shieldSketch=(p)=>{
-  let container,cw,ch,angle=0;
-  p.setup=()=>{
-    container=document.getElementById('shieldIcon');
-    cw=container.clientWidth;ch=container.clientHeight;
-    p.createCanvas(cw,ch,p.WEBGL).parent(container);
-    p.angleMode(p.DEGREES);
-    p.noFill();p.stroke(84,198,255,200);p.strokeWeight(2);
-  };
-  p.draw=()=>{
-    p.clear();
-    p.rotateX(18);p.rotateY(angle);
-    /* outer defensive torus */
-    p.push();p.torus(65,4,36,18);p.pop();
-    /* inner shielded core (low‑poly sphere for faceted feel) */
-    p.push();
-      p.rotateY(angle*1.3);
-      p.sphere(38,6,4);
-    p.pop();
-    angle+=0.8;
-  };
-  p.windowResized=()=>{cw=container.clientWidth;ch=container.clientHeight;p.resizeCanvas(cw,ch);}
-};
-new p5(shieldSketch);
+function updateControlStations() {
+  controlStations.forEach((station, i) => {
+    const { ctx, canvas, texture } = station;
+    
+    // Darken background for trail effect
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Matrix falling code effect
+    const columns = matrixColumns[i];
+    const color = stationColors[i];
+    
+    columns.forEach(column => {
+      // Move column down
+      column.y += column.speed;
+      
+      // Add new character occasionally
+      column.lastChar += 1;
+      if (column.lastChar > 8 + Math.random() * 8) {
+        column.chars.push({
+          char: matrixChars[Math.floor(Math.random() * matrixChars.length)],
+          y: column.y,
+          alpha: 1
+        });
+        column.lastChar = 0;
+      }
+      
+      // Update and draw characters
+      for (let j = column.chars.length - 1; j >= 0; j--) {
+        const char = column.chars[j];
+        
+        // Character fades as it gets older
+        const distanceFromHead = column.y - char.y;
+        char.alpha = Math.max(0, 1 - (distanceFromHead / 100));
+        
+        if (char.alpha > 0) {
+          // Bright head character
+          if (j === column.chars.length - 1) {
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 14px monospace';
+          } else {
+            // Trailing characters in station color
+            ctx.fillStyle = color.replace(')', `, ${char.alpha})`).replace('#', 'rgba(').replace(/(.{2})(.{2})(.{2})/, '$1, $2, $3');
+            if (!ctx.fillStyle.includes('rgba')) {
+              // Fallback for hex colors
+              const r = parseInt(color.slice(1, 3), 16);
+              const g = parseInt(color.slice(3, 5), 16);
+              const b = parseInt(color.slice(5, 7), 16);
+              ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${char.alpha})`;
+            }
+            ctx.font = '12px monospace';
+          }
+          
+          ctx.fillText(char.char, column.x, char.y);
+        } else {
+          // Remove faded characters
+          column.chars.splice(j, 1);
+        }
+      }
+      
+      // Reset column when it goes off screen
+      if (column.y > canvas.height + 50) {
+        column.y = Math.random() * -200;
+        column.chars = [];
+      }
+    });
+    
+    texture.needsUpdate = true;
+  });
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  time += 0.01;
+  
+  // Animate lights - enhanced movement and color shifting
+  lights.forEach((light, i) => {
+    light.position.x = Math.sin(time + i * 1.5) * 15;
+    light.position.z = Math.cos(time + i * 1.5) * 15;
+    light.position.y = 3 + Math.sin(time * 2 + i) * 5;
+    
+    // Dynamic color shifting
+    const hue = (time * 50 + i * 90) % 360;
+    light.color.setHSL(hue / 360, 0.8, 0.5);
+    
+    // Pulse intensity
+    light.intensity = 3 + Math.sin(time * 3 + i * 2) * 1.5;
+  });
+  
+  // Update radar system
+  updateRadar();
+  
+  // Update radar plane opacity
+  radarMaterial.opacity = radarOpacityValue;
+  
+  // Update panel matrix system
+  updatePanelMatrix();
+  updatePanelBackgrounds();
+  
+  // Animate glass panels with subtle rotation for glassmorphic effect
+  glassPanels.forEach((panel, i) => {
+    panel.rotation.y = (i - 1) * 0.2 + Math.sin(time * 0.2 + i) * 0.1;
+    panel.material.opacity = 0.15 + Math.sin(time + i) * 0.05;
+  });
+  
+  // Animate main wall color for enhanced glassmorphic effect
+  const hue = (time * 20) % 360;
+  const color = new THREE.Color().setHSL((hue + 240) / 360, 0.6, 0.1); // Purple to blue range
+  wall.material.color = color;
+  
+  // Animate background glow sphere color and opacity
+  const bgHue = (time * 15) % 120; // Slower cycle, 120 degree range
+  const bgColor = new THREE.Color().setHSL((bgHue + 240) / 360, 0.8, sphereIntensityValue); // Purple to blue
+  backgroundSphere.material.color = bgColor;
+  backgroundSphere.material.opacity = sphereOpacityValue;
+  
+  // Animate fog color
+  const fogHue = (time * 10) % 60; // Even slower, smaller range
+  const fogColor = new THREE.Color().setHSL((fogHue + 260) / 360, fogSaturationValue, fogOpacityValue); // Dark purple to dark blue
+  scene.fog.color = fogColor;
+  
+  // Animate particles
+  particlesMesh.rotation.y += 0.0005;
+  
+  // Pulse screens
+  screens.forEach((screen, i) => {
+    screen.material.emissiveIntensity = 0.2 + Math.sin(time * 2 + i) * 0.1;
+  });
+  
+  // Float unfocused panels slightly
+  screenGroups.forEach((group, i) => {
+    if (!group.userData.focused && !group.userData.animating) {
+      group.position.y = group.userData.originalPosition.y + Math.sin(time + i) * 0.1;
+    }
+  });
+  
+  // Update control stations
+  updateControlStations();
+  
+  renderer.render(scene, camera);
+}
+
+// Initialize lighting controls
+setupLightingControls();
+
+// Initialize matrix effect
+initializeMatrix();
+
+// Initialize panel matrix
+initializePanelMatrix();
+
+animate();
+
+// Handle resize
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
 </script>
 </body>
 </html>
