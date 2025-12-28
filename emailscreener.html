@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EmailScreener - Privacy Policy</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--accent), #a371f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .tagline {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+    section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--accent);
+    }
+    p { margin-bottom: 1rem; }
+    p:last-child { margin-bottom: 0; }
+    ul {
+      margin: 1rem 0;
+      padding-left: 1.5rem;
+    }
+    li {
+      margin-bottom: 0.5rem;
+      color: var(--text-muted);
+    }
+    li strong {
+      color: var(--text);
+    }
+    .highlight {
+      background: rgba(88, 166, 255, 0.1);
+      border-left: 3px solid var(--accent);
+      padding: 1rem;
+      border-radius: 0 6px 6px 0;
+      margin: 1rem 0;
+    }
+    footer {
+      text-align: center;
+      padding-top: 2rem;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>EmailScreener</h1>
+      <p class="tagline">Personal email screening with local LLM processing</p>
+    </header>
+
+    <section>
+      <h2>About This Application</h2>
+      <p>
+        EmailScreener is a personal productivity tool that monitors a Gmail inbox and uses 
+        a locally-hosted large language model (LLM) to identify important or time-sensitive 
+        messages. When an urgent email is detected, the application sends a notification 
+        to the user's mobile device.
+      </p>
+      <div class="highlight">
+        This is a single-user, personal-use application. It is not offered as a service 
+        to the public.
+      </div>
+    </section>
+
+    <section>
+      <h2>Data Access</h2>
+      <p>This application requests read-only access to Gmail through the Google API:</p>
+      <ul>
+        <li><strong>Scope:</strong> <code>gmail.readonly</code></li>
+        <li><strong>Purpose:</strong> Read email metadata and content to determine message urgency</li>
+      </ul>
+      <p>
+        The application accesses email subject lines, sender information, timestamps, 
+        and message body text to evaluate whether a message requires immediate attention.
+      </p>
+    </section>
+
+    <section>
+      <h2>Data Handling</h2>
+      <ul>
+        <li><strong>Local Processing:</strong> All email analysis is performed locally using a self-hosted LLM. No email content is sent to external AI services.</li>
+        <li><strong>Minimal Storage:</strong> Only email IDs are stored to track which messages have been processed. Email content is not permanently retained.</li>
+        <li><strong>No Third-Party Sharing:</strong> Email data is never shared with, sold to, or disclosed to any third parties.</li>
+        <li><strong>Notifications:</strong> When urgent emails are detected, brief notification summaries are sent to the user's personal device via encrypted channels.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Data Security</h2>
+      <ul>
+        <li>OAuth 2.0 tokens are stored securely on the local server</li>
+        <li>All communication with Google APIs uses HTTPS encryption</li>
+        <li>The application runs on a private home network</li>
+        <li>No public-facing endpoints expose email data</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>User Rights</h2>
+      <p>As the sole user of this application, you can:</p>
+      <ul>
+        <li>Revoke access at any time via <a href="https://myaccount.google.com/permissions" target="_blank">Google Account Permissions</a></li>
+        <li>Delete all stored data by removing the application's state files</li>
+        <li>Review what data is stored at any time (stored locally on your device)</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Contact</h2>
+      <p>
+        For questions about this privacy policy or the application, contact:<br>
+        <a href="mailto:mark@missionfocused.ai">mark@missionfocused.ai</a>
+      </p>
+    </section>
+
+    <footer>
+      <p>Last updated: December 28, 2024</p>
+      <p style="margin-top: 0.5rem;">
+        <a href="https://missionfocused.ai">missionfocused.ai</a>
+      </p>
+    </footer>
+  </div>
+</body>
+</html>
+
