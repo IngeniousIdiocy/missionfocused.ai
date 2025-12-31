@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MissionFocused.ai | Terminal</title>
+    <style>
+        :root {
+            --terminal-green: #00ff41;
+            --terminal-bg: #0d1117;
+            --terminal-glow: 0 0 10px rgba(0, 255, 65, 0.5);
+            --scan-line-color: rgba(18, 16, 16, 0.5);
+            --font-family: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #000;
+            color: var(--terminal-green);
+            font-family: var(--font-family);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+        }
+
+        /* Retro CRT Screen Effect */
+        #crt-frame {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-color: var(--terminal-bg);
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        .scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom,
+                    rgba(255, 255, 255, 0),
+                    rgba(255, 255, 255, 0) 50%,
+                    rgba(0, 0, 0, 0.2) 50%,
+                    rgba(0, 0, 0, 0.2));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .flicker {
+            animation: flicker 0.15s infinite;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 255, 65, 0.01);
+            pointer-events: none;
+            z-index: 11;
+        }
+
+        @keyframes flicker {
+            0% {
+                opacity: 0.9;
+            }
+
+            50% {
+                opacity: 1.0;
+            }
+
+            100% {
+                opacity: 0.9;
+            }
+        }
+
+        /* Terminal Container */
+        #terminal-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            overflow-y: auto;
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE/Edge */
+            z-index: 5;
+        }
+
+        #terminal-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Typography */
+        pre {
+            font-family: var(--font-family);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 0;
+        }
+
+        .ascii-art {
+            color: var(--terminal-green);
+            font-weight: bold;
+            margin-bottom: 20px;
+            line-height: 1.2;
+            text-shadow: var(--terminal-glow);
+            white-space: pre;
+            /* Keep ASCII art alignment */
+            font-size: 12px;
+            /* Adjustable scale */
+        }
+
+        @media (min-width: 768px) {
+            .ascii-art {
+                font-size: 14px;
+            }
+        }
+
+        .output-line {
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+
+        .command-section {
+            margin-top: 10px;
+        }
+
+        .prompt {
+            color: #00ff41;
+            text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+            font-weight: bold;
+            margin-right: 8px;
+            white-space: nowrap;
+        }
+
+        /* Input Area */
+        #input-line {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            padding-bottom: 20px;
+            /* Space for scrolling */
+        }
+
+        #command-display {
+            white-space: pre-wrap;
+            word-break: break-all;
+            text-shadow: var(--terminal-glow);
+        }
+
+        /* Hidden Input for capturing typing */
+        #command-input {
+            position: absolute;
+            opacity: 0;
+            top: -1000px;
+            left: -1000px;
+        }
+
+        /* Custom Blinking Cursor */
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 18px;
+            background-color: var(--terminal-green);
+            animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* Dynamic Classes */
+        .highlight {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .error {
+            color: #ff3333;
+            text-shadow: 0 0 5px rgba(255, 51, 51, 0.5);
+        }
+
+        .link {
+            color: #54c6ff;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .success {
+            color: #00ff41;
+        }
+
+        /* Stats Bar */
+        #status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #002200;
+            border-top: 1px solid var(--terminal-green);
+            padding: 5px 10px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 20;
+            color: #00ff41;
+        }
+
+        .stat-item {
+            margin-right: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="crt-frame">
+        <div class="scanlines"></div>
+        <div class="flicker"></div>
+
+        <div id="terminal-container" onclick="document.getElementById('command-input').focus()">
+            <div id="output"></div>
+
+            <div id="input-line">
+                <span class="prompt">visitor@missionfocused.ai:~$</span>
+                <span id="command-display"></span><span class="cursor">&nbsp;</span>
+                <input type="text" id="command-input" autocomplete="off" spellcheck="false">
+            </div>
+        </div>
+
+        <div id="status-bar">
+            <span>STATUS: ONLINE</span>
+            <span id="live-stat-1" class="stat-item">Processing Grants...</span>
+            <span id="live-stat-2" class="stat-item">AI Agents Active: 04</span>
+            <span>V2.1.7-CLI</span>
+        </div>
+    </div>
+
+    <script>
+        // --- Configuration ---
+        const config = {
+            typingSpeed: 30, // ms per char
+            asciiArt: `
+  __  __ _       _             
+ |  \\/  (_)     (_)            
+ | \\  / |_ ___ ___ _  ___  _ __ 
+ | |\\/| | / __/ __| |/ _ \\| '_ \\ 
+ | |  | | \\__ \\__ \\ | (_) | | | |
+ |_|  |_|_|___/___/_|\\___/|_| |_|
+  F O C U S E D . A I
+            `
+        };
+
+        // --- State ---
+        const state = {
+            commandHistory: [],
+            historyIndex: -1,
+            isTyping: false
+        };
+
+        // --- DOM Elements ---
+        const input = document.getElementById('command-input');
+        const display = document.getElementById('command-display');
+        const output = document.getElementById('output');
+        const terminal = document.getElementById('terminal-container');
+
+        // --- System Commands ---
+        const fileSystem = {
+            'about.txt': "MissionFocused.ai empowers non-profits with cutting-edge AI automation. We streamline back-office operations, allowing organizations to focus 100% on their mission.",
+            'contact.txt': "Email: hello@missionfocused.ai\nTwitter: @MissionFocused\nGitHub: github.com/MissionFocusedUI",
+            'services.txt': "- AI Grant Writing Assistant\n- Donor Data Analysis\n- Volunteer Matching Algorithms\n- Automated Impact Reporting"
+        };
+
+        const commands = {
+            help: {
+                description: "List available commands",
+                execute: () => {
+                    let response = "AVAILABLE COMMANDS:\n\n";
+                    Object.keys(commands).forEach(cmd => {
+                        response += `  ${cmd.padEnd(12)} - ${commands[cmd].description}\n`;
+                    });
+                    return response;
+                }
+            },
+            about: {
+                description: "Learn about our mission",
+                execute: () => fileSystem['about.txt']
+            },
+            services: {
+                description: "List our AI services",
+                execute: () => fileSystem['services.txt']
+            },
+            stats: {
+                description: "View live impact metrics",
+                execute: () => {
+                    return `
+LIVE SYSTEM METRICS:
+--------------------
+> Non-Profits Supported:    142
+> Hours Saved (YTD):        12,450
+> Grants Generated:         89 ($4.2M Value)
+> AI Tokens Processed:      4.5B
+> Efficiency Gain:          +340%
+                    `;
+                }
+            },
+            contact: {
+                description: "Get in touch",
+                execute: () => fileSystem['contact.txt']
+            },
+            ls: {
+                description: "List files",
+                execute: () => Object.keys(fileSystem).join('  ')
+            },
+            cat: {
+                description: "Read file contents (usage: cat <filename>)",
+                execute: (args) => {
+                    if (!args[0]) return "Usage: cat <filename>";
+                    return fileSystem[args[0]] || `Error: File '${args[0]}' not found.`;
+                }
+            },
+            clear: {
+                description: "Clear terminal",
+                execute: () => {
+                    output.innerHTML = '';
+                    return null; // Special case to prevent empty line
+                }
+            },
+            sudo: {
+                description: "Admin privileges",
+                execute: () => "Permission denied: You do not have root access to the Mission Control mainframe."
+            },
+            login: {
+                description: "Staff login",
+                execute: () => {
+                    setTimeout(() => {
+                        window.location.href = '#login'; // Hint at functionality
+                    }, 500);
+                    return "Initiating secure handshake...";
+                }
+            }
+        };
+
+        // --- Core Logic ---
+
+        function init() {
+            printLine(config.asciiArt, 'ascii-art');
+            setTimeout(() => {
+                printTyped("Welcome to MissionFocused.ai Terminal Interface v2.1.7", () => {
+                    printTyped("Type 'help' to view available commands.", () => {
+                        input.focus();
+                    });
+                });
+            }, 500);
+
+            startLiveStats();
+        }
+
+        function handleCommand(cmdStr) {
+            const cleanCmd = cmdStr.trim();
+            if (!cleanCmd) return;
+
+            // Add to history
+            state.commandHistory.push(cleanCmd);
+            state.historyIndex = state.commandHistory.length;
+
+            // Print prompt and command
+            const cmdLine = document.createElement('div');
+            cmdLine.className = 'command-section';
+            cmdLine.innerHTML = `<span class="prompt">visitor@missionfocused.ai:~$</span> ${escapeHtml(cleanCmd)}`;
+            output.appendChild(cmdLine);
+
+            // Parse
+            const parts = cleanCmd.split(' ');
+            const cmdName = parts[0].toLowerCase();
+            const args = parts.slice(1);
+
+            let result = "";
+            if (commands[cmdName]) {
+                const cmdObj = commands[cmdName];
+                result = cmdObj.execute(args);
+
+                if (cmdName === 'clear') {
+                    // special handling in execute
+                } else if (result) {
+                    printLine(result);
+                }
+            } else {
+                printLine(`Command not found: ${cmdName}. Type 'help' for options.`, 'error');
+            }
+
+            scrollToBottom();
+        }
+
+        // --- Output Helpers ---
+
+        function printLine(text, className = '') {
+            if (text === null) return;
+            const line = document.createElement('pre');
+            line.className = 'output-line ' + className;
+            line.textContent = text;
+            output.appendChild(line);
+            scrollToBottom();
+        }
+
+        function printTyped(text, callback) {
+            const line = document.createElement('pre');
+            line.className = 'output-line';
+            output.appendChild(line);
+            state.isTyping = true;
+
+            let i = 0;
+            const interval = setInterval(() => {
+                line.textContent += text.charAt(i);
+                i++;
+                scrollToBottom();
+                if (i >= text.length) {
+                    clearInterval(interval);
+                    state.isTyping = false;
+                    if (callback) callback();
+                }
+            }, config.typingSpeed);
+        }
+
+        function scrollToBottom() {
+            // terminal.scrollTop = terminal.scrollHeight;
+            // Ensure inputs are visible
+            const inputLine = document.getElementById('input-line');
+            inputLine.scrollIntoView({ behavior: "smooth", block: "end" });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function updateDisplay() {
+            display.textContent = input.value;
+            scrollToBottom();
+        }
+
+        // --- Event Listeners ---
+
+        input.addEventListener('input', updateDisplay);
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                handleCommand(input.value);
+                input.value = '';
+                updateDisplay();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (state.historyIndex > 0) {
+                    state.historyIndex--;
+                    input.value = state.commandHistory[state.historyIndex];
+                    updateDisplay();
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (state.historyIndex < state.commandHistory.length - 1) {
+                    state.historyIndex++;
+                    input.value = state.commandHistory[state.historyIndex];
+                    updateDisplay();
+                } else {
+                    state.historyIndex = state.commandHistory.length;
+                    input.value = '';
+                    updateDisplay();
+                }
+            }
+        });
+
+        // Focus handling
+        document.addEventListener('click', () => {
+            if (!window.getSelection().toString()) {
+                input.focus();
+            }
+        });
+
+        // --- Dynamic Stats Effect ---
+        function startLiveStats() {
+            const stats = [
+                "Optimizing databases...",
+                "Analyzing grant proposals...",
+                "Matching volunteers...",
+                "Syncing donor records...",
+                "Generating impact reports...",
+                "Scanning for efficiency gaps..."
+            ];
+
+            const statEl1 = document.getElementById('live-stat-1');
+
+            setInterval(() => {
+                const randomStat = stats[Math.floor(Math.random() * stats.length)];
+                statEl1.textContent = randomStat;
+            }, 3000);
+
+            // Random number ticker
+            const statEl2 = document.getElementById('live-stat-2');
+            let agents = 4;
+            setInterval(() => {
+                if (Math.random() > 0.7) {
+                    agents = agents + (Math.random() > 0.5 ? 1 : -1);
+                    if (agents < 2) agents = 2;
+                    statEl2.textContent = `AI Agents Active: 0${agents}`;
+                }
+            }, 5000);
+        }
+
+        // Start
+        init();
+
+    </script>
+</body>
+
+</html>
