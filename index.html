@@ -443,7 +443,17 @@
                 this.height = height; // Characters high
                 this.width = getMaxChars(elementId); // Initial calculate
 
-                this.data = new Array(this.width * 2).fill(0);
+                // Brownian motion state
+                this.currentValue = 0.5; // Start at midpoint
+                this.mean = 0.5;         // Long-term mean to revert toward
+                this.theta = 0.08;       // Mean reversion speed (higher = snappier return)
+                this.sigma = 0.12;       // Volatility (random walk intensity)
+
+                // Event state for occasional bursts/drops
+                this.eventValue = 0;
+                this.eventDecay = 0.92;
+
+                this.data = new Array(this.width * 2).fill(0.5);
 
                 // Recalculate on resize
                 window.addEventListener('resize', () => this.resize());
@@ -456,7 +466,7 @@
                     const diff = (newWidth * 2) - this.data.length;
                     if (diff > 0) {
                         // Add new slots
-                        this.data = [...new Array(diff).fill(0), ...this.data];
+                        this.data = [...new Array(diff).fill(0.5), ...this.data];
                     } else if (diff < 0) {
                         this.data = this.data.slice(-diff);
                     }
@@ -464,17 +474,44 @@
                 }
             }
 
+            // Box-Muller transform for normal distribution
+            randomNormal() {
+                const u1 = Math.random();
+                const u2 = Math.random();
+                return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+            }
+
             update() {
                 // Shift data left
                 this.data.shift();
 
-                // Generate new value (Sine + Noise + Spikes)
-                const time = Date.now() / 1000;
-                let val = (Math.sin(time) * 0.3) + 0.5; // Base sine 0.2-0.8
-                val += (Math.random() - 0.5) * 0.2; // Noise
-                if (Math.random() > 0.95) val += 0.4; // Spike
+                // Ornstein-Uhlenbeck process (Brownian motion with mean reversion)
+                // dx = θ(μ - x)dt + σ*dW
+                const meanReversion = this.theta * (this.mean - this.currentValue);
+                const randomWalk = this.sigma * this.randomNormal();
+                this.currentValue += meanReversion + randomWalk;
 
-                // Clamp 0-1
+                // Occasional events: sudden traffic bursts or drops
+                if (Math.random() > 0.97) {
+                    // Random event: burst up or drop down
+                    this.eventValue = (Math.random() - 0.3) * 0.4; // Biased toward bursts
+                }
+                // Decay the event effect
+                this.eventValue *= this.eventDecay;
+
+                // Combine base value with event
+                let val = this.currentValue + this.eventValue;
+
+                // Soft clamp with bounce-back (keeps it feeling organic)
+                if (val < 0.05) {
+                    val = 0.05 + Math.abs(val - 0.05) * 0.5;
+                    this.currentValue = 0.1;
+                }
+                if (val > 0.95) {
+                    val = 0.95 - (val - 0.95) * 0.5;
+                    this.currentValue = 0.9;
+                }
+
                 val = Math.max(0, Math.min(1, val));
                 this.data.push(val);
 
